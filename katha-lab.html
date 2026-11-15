@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Katha Lab – Gemini Hyperparameter Playground</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600&family=Yatra+One&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120f26;--pn:#1b1738;--pn2:#262152;--ln:#3a3470;--tx:#efeaff;--mu:#a9a3d6;--sf:#f2a33a;--or:#ff7a2f;--lo:#e86fa0;--tl:#4cc9b0;--bad:#ff7b72}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 'Mukta',system-ui,sans-serif}
+h1,h2,h3{font-family:'Yatra One',Georgia,serif;font-weight:400;margin:0}
+input,select,textarea,button{font:inherit;color:var(--tx);background:var(--pn2);border:1px solid var(--ln);border-radius:8px;padding:6px 9px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--sf)}
+button{cursor:pointer}button:hover{border-color:var(--sf)}button:disabled{opacity:.45;cursor:not-allowed}
+.go{background:linear-gradient(135deg,var(--or),var(--sf));color:#1b1004;border:0;font-weight:600;padding:8px 18px}
+header{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between;padding:12px 22px;border-bottom:1px solid var(--ln)}
+.brand{display:flex;gap:12px;align-items:center}.dev{font-size:34px;color:var(--or);font-family:'Yatra One',serif}
+.brand h1{font-size:24px}.brand small{color:var(--mu)}
+nav{display:flex;gap:6px;background:var(--pn);padding:5px;border-radius:12px;border:1px solid var(--ln)}
+nav button{border:0;background:none;padding:7px 16px}nav button.on{background:linear-gradient(135deg,var(--or),var(--sf));color:#1b1004;font-weight:600}
+.key{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--mu);font-size:14px}.key input[type=password],.key input[type=text]{width:200px}
+.tab{display:none;padding:16px 22px}.tab.on{display:block}
+#play.on{display:grid;grid-template-columns:270px minmax(0,1fr) 330px;gap:16px;align-items:start}
+@media(max-width:1100px){#play.on{grid-template-columns:1fr}}
+.box{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px}.box+.box{margin-top:14px}
+h2{font-size:19px;margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}.chip{border-radius:99px;padding:2px 10px;font-size:13px;background:var(--pn2)}
+.chip.on{background:var(--sf);color:#1b1004;border-color:var(--sf)}
+.lib{max-height:calc(100vh - 290px);overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.card{text-align:left;padding:9px}.card.on{border-color:var(--sf);background:#33295a}.card small{display:block;color:var(--mu)}
+.tg{display:inline-block;font-size:12px;border-radius:5px;padding:0 6px;margin-right:4px}.R{background:#4a3417;color:var(--sf)}.M{background:#4a1d38;color:var(--lo)}.C{background:#12403a;color:var(--tl)}
+.look{margin:6px 0;padding-left:18px;color:#d8d3f5}.sweep{border-color:var(--tl);color:#bff0e5;font-size:13px;padding:4px 10px}
+textarea{width:100%;resize:vertical}
+.bar2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.sw{display:flex;align-items:center;gap:6px;color:var(--mu)}input[type=checkbox]{accent-color:var(--sf)}
+.tog{appearance:none;width:38px;height:20px;border-radius:99px;background:var(--pn2);border:1px solid var(--ln);position:relative;padding:0;cursor:pointer}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--mu);transition:.15s}
+.tog:checked{background:var(--or)}.tog:checked::after{left:20px;background:#fff}
+.runs{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px}
+.run{background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:10px;display:flex;flex-direction:column;min-height:170px}
+.run h3{font-size:14px;color:var(--lo);margin-bottom:4px;font-family:'Mukta';font-weight:600}
+.out{white-space:pre-wrap;flex:1;max-height:360px;overflow:auto}.stats{font-size:12.5px;color:var(--mu);border-top:1px dashed var(--ln);margin-top:6px;padding-top:5px}
+.warn,.err{color:var(--bad)}.cur::after{content:'▍';color:var(--sf);animation:b 1s steps(2) infinite}@keyframes b{50%{opacity:0}}
+#sim{display:inline-block;background:#12403a;color:var(--tl);border-radius:99px;padding:1px 10px;font-size:13px;margin-left:8px}
+.ctl{margin:10px 0}.ctl .t{display:flex;align-items:center;gap:6px}.ctl .t b{flex:1;font-weight:600}.ctl .t small{color:var(--mu);font-size:12px}
+.ctl.off .sl,.ctl.off .hint{opacity:.4}.q{border-radius:50%;width:20px;height:20px;padding:0;font-size:12px;color:var(--mu)}
+.sl{display:flex;gap:8px;align-items:center}.sl input[type=range]{flex:1;accent-color:var(--sf);padding:0;background:none;border:0}.sl input[type=number]{width:74px;text-align:center}
+.hint{font-size:13px;color:var(--sf)}.rs{padding:0 6px}
+.viz{display:flex;gap:6px;align-items:flex-end;height:210px}.b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;min-width:0}
+.b i{display:block;width:100%;background:var(--tl);border-radius:5px 5px 0 0;transition:height .25s;min-height:2px}.b.off i{background:#4a4680}
+.b span{font-size:12.5px;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.b.off span{text-decoration:line-through;color:#7a75b0}.b em{font-style:normal;font-size:12px;color:var(--mu)}
+.vg{display:grid;grid-template-columns:320px 1fr;gap:16px}@media(max-width:900px){.vg{grid-template-columns:1fr}}
+.hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.hist span{background:var(--pn2);border-radius:8px;padding:2px 9px}
+.gd{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.gd .box{margin:0!important}.gd p{margin:4px 0;color:#d8d3f5}
+@media(prefers-reduced-motion:reduce){.cur::after{animation:none}.b i,.tog::after{transition:none}}
+</style></head><body>
+<header>
+ <div class="brand"><span class="dev">कथा</span><div><h1>Katha Lab</h1><small>Gemini hyperparameter playground · Ramayana &amp; Mahabharata</small></div></div>
+ <nav id="tabs"><button data-t="play" class="on">Playground</button><button data-t="viz">Sampling Visualizer</button><button data-t="guide">Guide</button></nav>
+ <div class="key"><label for="key">Gemini API key</label><input id="key" type="password" placeholder="AIza…"><button id="eye" title="Show or hide key">Show</button><label class="sw"><input type="checkbox" id="rem">remember</label></div>
+</header>
+
+<div id="play" class="tab on">
+ <aside class="box"><h2>Story library</h2>
+  <div class="chips" id="fe"></div><div class="chips" id="fc"></div><div class="lib" id="lib"></div></aside>
+ <div>
+  <div class="box" id="detail"></div>
+  <div class="box"><details open><summary>System instruction (persona / rules for the model)</summary><textarea id="sys" rows="2" placeholder="Optional. e.g. You are Sanjaya narrating the war to King Dhritarashtra…"></textarea></details>
+   <label for="prompt" style="display:block;margin-top:10px;color:var(--mu)">Prompt</label><textarea id="prompt" rows="4"></textarea>
+   <div class="bar2"><button class="go" id="run">Run</button><button id="stop" disabled>Stop</button>
+    <label class="sw">Runs <select id="n"><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
+    <label class="sw"><input type="checkbox" class="tog" id="live">Live mode</label><label class="sw"><input type="checkbox" class="tog" id="stream" checked>Stream</label></div></div>
+  <div class="box"><h2>Output <span id="sim" hidden></span></h2><div class="runs" id="runs"><p style="color:var(--mu)">Pick a story, add your API key, then press Run.</p></div></div>
+ </div>
+ <aside class="box"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Hyperparameters</h2><small style="color:var(--mu)">tick = send to API</small></div>
+  <b>Model</b><div class="sl" style="margin:4px 0 6px"><select id="model" style="flex:1"></select><button id="list" title="Fetch models available to your key">⟳ list</button></div>
+  <div id="ctls"></div>
+  <div class="ctl"><b>Stop sequence</b><input id="stop1" placeholder="e.g. 3." style="width:100%;margin-top:4px"></div>
+  <label class="sw"><input type="checkbox" id="json">JSON output</label><br>
+  <label class="sw"><input type="checkbox" id="think">Allow thinking (eats token budget)</label>
+ </aside>
+</div>
+
+<div id="viz" class="tab"><div class="vg">
+ <div class="box"><h2>Sampling Visualizer</h2><p style="color:var(--mu);margin:0 0 8px">No API call needed. See how the three sampling knobs reshape the odds of the next word.</p>
+  <label for="sc">Sentence</label><select id="sc" style="width:100%"></select><div id="vctl"></div>
+  <div class="bar2"><button class="go" id="draw">Draw 50 words</button></div></div>
+ <div class="box"><h2 id="vt"></h2><div class="viz" id="vz"></div>
+  <p style="color:var(--mu);font-size:13px">Green = still allowed. Struck-through grey = removed by Top-K or Top-P. Percentages are renormalised after filtering. Illustrative numbers, not Gemini's real ones.</p><div class="hist" id="hist"></div></div>
+</div></div>
+
+<div id="guide" class="tab"><div class="gd">
+ <div class="box"><h2>Temperature</h2><p>Scales the randomness of every word choice. Near 0 the top word nearly always wins. Above 1 unlikely words get a real chance. Facts: low. Poetry: higher.</p></div>
+ <div class="box"><h2>Top-P (nucleus)</h2><p>Keep the smallest group of words whose probabilities add up to P, drop the rest. 0.9 means ignore the unlikely 10% tail.</p></div>
+ <div class="box"><h2>Top-K</h2><p>Only the K most likely words are candidates. K = 1 is greedy: always the single best word.</p></div>
+ <div class="box"><h2>Max output tokens</h2><p>A hard ceiling on answer length (about 4 characters per token). The model does not plan to fit; it just gets cut off, and finishReason shows MAX_TOKENS.</p></div>
+ <div class="box"><h2>Stop sequences</h2><p>Generation ends the moment this text would appear. The stop text itself is not included.</p></div>
+ <div class="box"><h2>Penalties</h2><p>Presence penalty discourages words already used at all. Frequency penalty grows with each repeat. Useful against repetitive loops. Some models reject them.</p></div>
+ <div class="box"><h2>Seed</h2><p>A fixed seed with identical settings makes runs more repeatable. Not a strict guarantee.</p></div>
+ <div class="box"><h2>Try this</h2><p>1) Run "Hanuman's Leap" with the temperature sweep. 2) Use the Top-K story with K = 1 vs 40. 3) Open the Visualizer and slide Top-P down. 4) Use Live mode and drag sliders.</p></div>
+ <div class="box"><h2>Setup</h2><p>Get a free key at aistudio.google.com/apikey, paste it at the top, tick "remember" to keep it in this browser. Use "⟳ list" to see the models your key can use.</p></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],rep=(o,n)=>Array.from({length:n},()=>o);
+const P=[
+ {id:'temperature',n:'Temperature',min:0,max:2,st:.05,v:1,d:'1.0',on:1,tip:'Randomness of word choice.',h:v=>v<=.2?'Precise: nearly always the top word':v<=.8?'Safe: a little variety':v<=1.3?'Creative: a storyteller adding colour':'Wild: rare words win, may ramble'},
+ {id:'topP',n:'Top-P (nucleus)',min:0,max:1,st:.01,v:.95,d:'0.95',on:1,tip:'Keep words until cumulative probability reaches P.',h:v=>v<.3?'Very narrow: only the top few words':v<.9?'Focused: unlikely tail is cut':'Wide: only the very unlikely words are cut'},
+ {id:'topK',n:'Top-K',min:1,max:100,st:1,v:40,d:'model-specific (~40)',on:1,tip:'Only the K most likely words are candidates.',h:v=>v==1?'Greedy: only the single best word':v<=5?'Short-list: '+v+' candidates':'Typical setting'},
+ {id:'maxOutputTokens',n:'Max output tokens',min:10,max:2048,st:10,v:300,d:'model-specific',on:1,tip:'Hard cap on answer length.',h:v=>'≈ '+Math.round(v*.75)+' English words (fewer for Devanagari-heavy text)'},
+ {id:'presencePenalty',n:'Presence penalty',min:-2,max:2,st:.1,v:0,d:'0',on:0,tip:'Pushes toward new topics. May be rejected by some models.',h:v=>v>0?'Prefers new ideas and names':v<0?'Prefers repeating itself':'Neutral'},
+ {id:'frequencyPenalty',n:'Frequency penalty',min:-2,max:2,st:.1,v:0,d:'0',on:0,tip:'Penalises words in proportion to how often they appeared.',h:v=>v>0?'Repetition becomes less likely':v<0?'Repetition rewarded':'Neutral'},
+ {id:'seed',n:'Seed',min:0,max:9999,st:1,v:42,d:'random',on:0,tip:'Same seed + same settings = more repeatable runs.',h:v=>'Fixed seed '+v}
+];
+const T4=[0,.7,1.4,2];
+const S=[
+{e:'R',c:'Temperature',t:'Hanuman’s Leap: careful vs. creative',d:'Temperature changes how adventurous each word choice is. Run the identical prompt at several temperatures and compare.',look:['At temperature 0 the runs come out almost identical. Check the similarity badge.','At 1.8–2.0 expect odd imagery and sometimes gibberish.','Find the sweet spot (≈0.8–1.2): vivid but coherent.'],p:'Describe Hanuman’s leap across the ocean to Lanka in exactly three vivid sentences.',set:{temperature:1},sw:[['Sweep: T = 0 / 0.7 / 1.4 / 2.0',T4.map(x=>({temperature:x}))],['4 runs at T = 0',rep({temperature:0},4)],['4 runs at T = 1.6',rep({temperature:1.6},4)]]},
+{e:'R',c:'Temperature',t:'Who slew whom? (accuracy vs. randomness)',d:'Facts get shakier as temperature rises.',look:['At T=0 the answers agree.','At T=2 names may get swapped.'],p:'Briefly: who killed Ravana, who killed Kumbhakarna, and who killed Meghanada?',set:{temperature:0},sw:[['Sweep: T = 0 / 1 / 1.5 / 2',[0,1,1.5,2].map(x=>({temperature:x}))]]},
+{e:'M',c:'Top-K',t:'Name a Divine Weapon (Top-K)',d:'Short outputs make the effect of the shortlist size easy to see.',look:['K=1: every run gives the same weapon.','K=40 with high temperature: more variety.'],p:'Name one divine astra used in the Mahabharata war. Reply with only its name.',set:{temperature:1.5,topK:40,maxOutputTokens:20},sw:[['4 runs, K = 1',rep({topK:1},4)],['4 runs, K = 40',rep({topK:40},4)],['Sweep: K = 1 / 3 / 10 / 40',[1,3,10,40].map(x=>({topK:x}))]]},
+{e:'M',c:'Top-P',t:'Karna’s Words (Top-P)',d:'Poetry under shrinking nucleus sizes.',look:['P=0.1 is plain and predictable.','P=1 allows the full vocabulary.'],p:'Write a 4-line poem in Karna’s voice about being denied his birthright.',set:{temperature:1.2,topP:.95,maxOutputTokens:150},sw:[['Sweep: P = 0.1 / 0.5 / 0.9 / 1',[.1,.5,.9,1].map(x=>({topP:x}))]]},
+{e:'R',c:'Max tokens',t:'Rama’s Exile in N tokens',d:'Max tokens cuts the answer; it does not make it shorter on purpose.',look:['Small limits chop mid-sentence.','Watch finish: MAX_TOKENS in the stats.'],p:'Narrate Rama’s fourteen-year exile, from Ayodhya to the return.',set:{temperature:.7,maxOutputTokens:150},sw:[['Sweep: 20 / 60 / 150 / 400 tokens',[20,60,150,400].map(x=>({maxOutputTokens:x}))]]},
+{e:'M',c:'Stop sequences',t:'Counting the Pandavas',d:'A stop sequence ends generation as soon as it appears.',look:['With stop "3." the list ends after item 2.','Without it you get all five.'],p:'List the five Pandava brothers as a numbered list, one per line.',set:{temperature:.2,maxOutputTokens:200},sw:[['Stop at "3."',[{stop:'3.'}]],['No stop',[{stop:''}]],['Compare both',[{stop:''},{stop:'3.'}]]]},
+{e:'R',c:'Penalties',t:'Sita’s Lament (repetition)',d:'Penalties fight repeated words.',look:['At 0 the word "Rama" repeats a lot.','Higher frequency penalty forces synonyms.'],p:'Write Sita’s lament in 5 sentences, using the word "Rama" as often as feels natural.',set:{temperature:.9,maxOutputTokens:250},sw:[['Frequency penalty 0 / 0.8 / 1.5 / 2',[0,.8,1.5,2].map(x=>({frequencyPenalty:x}))],['Presence penalty 0 / 1 / 2',[0,1,2].map(x=>({presencePenalty:x}))]]},
+{e:'M',c:'Seed',t:'Draupadi’s Vow (Seed)',d:'Fixed seed gives repeatable runs even at high temperature.',look:['Seed 42 x3 should look alike.','Random x3 will diverge.'],p:'Write two sentences in Draupadi’s voice vowing to keep her hair unbound.',set:{temperature:1.3,maxOutputTokens:120},sw:[['3 runs, seed 42',rep({seed:42},3)],['3 runs, random',rep({seed:-1},3)]]},
+{e:'M',c:'System prompt',t:'Sanjaya narrates the war',d:'The system instruction changes the voice, not the facts.',look:['Same prompt, three personas.'],p:'Describe the first day of the Kurukshetra war in four sentences.',set:{temperature:.8,maxOutputTokens:220},sw:[['3 personas',[{sys:'You are Sanjaya narrating to the blind king Dhritarashtra.'},{sys:'You are a cricket commentator.'},{sys:'You are a dry historian writing a textbook.'}]]]},
+{e:'R',c:'JSON output',t:'Ramayana characters as JSON',d:'Ask the API for machine-readable output.',look:['JSON on gives a clean array.','Off may wrap text around it.'],p:'Give 4 Ramayana characters as a JSON array of objects with name, role and one trait.',set:{temperature:.2,maxOutputTokens:400},sw:[['JSON on vs off',[{json:true},{json:false}]]]},
+{e:'M',c:'Use case',t:'Gita quiz maker',d:'A practical use: low temperature for dependable structure.',look:['Compare T=0.2 and T=1.5 for quiz quality.'],p:'Create a 3-question multiple-choice quiz on the Bhagavad Gita, with answers at the end.',set:{temperature:.4,maxOutputTokens:500},sw:[['T = 0.2 vs 1.5',[{temperature:.2},{temperature:1.5}]]]}
+];
+const CON=['Any concept',...new Set(S.map(s=>s.c))];let fe='All',fc='Any concept',cur=0;
+function chips(id,arr,get,set){$(id).innerHTML=arr.map(x=>`<button class="chip ${get()===x?'on':''}">${x}</button>`).join('');$$(id+' .chip').forEach(b=>b.onclick=()=>{set(b.textContent);buildLib()})}
+function buildLib(){
+ chips('#fe',['All','Ramayana','Mahabharata'],()=>fe,v=>fe=v);chips('#fc',CON,()=>fc,v=>fc=v);
+ $('#lib').innerHTML=S.map((s,i)=>({s,i})).filter(({s})=>(fe==='All'||(fe==='Ramayana')===(s.e==='R'))&&(fc==='Any concept'||s.c===fc)).map(({s,i})=>`<button class="card ${i===cur?'on':''}" data-i="${i}"><span class="tg ${s.e}">${s.e==='R'?'Ramayana':'Mahabharata'}</span><span class="tg C">${s.c}</span><b style="display:block">${s.t}</b><small>${s.d.split('.')[0]}.</small></button>`).join('');
+ $$('.card').forEach(b=>b.onclick=()=>{pick(+b.dataset.i);buildLib()});
+}
+function pick(i){
+ cur=i;const s=S[i];
+ $('#detail').innerHTML=`<span class="tg ${s.e}">${s.e==='R'?'Ramayana':'Mahabharata'}</span><span class="tg C">${s.c}</span><h2 style="font-size:24px;margin-top:6px">${s.t}</h2><p style="margin:4px 0">${s.d}</p><b style="color:var(--mu);font-size:13px">What to look for</b><ul class="look">${s.look.map(x=>`<li>${x}</li>`).join('')}</ul><div class="chips">${s.sw.map((w,j)=>`<button class="chip sweep" data-j="${j}">⚗ ${w[0]}</button>`).join('')}</div>`;
+ $$('.sweep').forEach(b=>b.onclick=()=>run(S[cur].sw[+b.dataset.j][1]));
+ $('#prompt').value=s.p;$('#sys').value=s.sys||'';$('#stop1').value='';$('#json').checked=false;
+ P.forEach(p=>{const v=s.set[p.id];$('#c_'+p.id).checked=v!==undefined||!!p.on;setV(p.id,v??p.v)});refresh();
+}
+function buildCtl(){
+ $('#ctls').innerHTML=P.map(p=>`<div class="ctl" id="w_${p.id}"><div class="t"><input type="checkbox" id="c_${p.id}"><b>${p.n}</b><button class="q" title="${p.tip}">?</button><small>API default: ${p.d}</small><button class="rs" data-r="${p.id}" title="Reset">↺</button></div>
+ <div class="sl"><input type="range" id="r_${p.id}" min="${p.min}" max="${p.max}" step="${p.st}"><input type="number" id="n_${p.id}" min="${p.min}" max="${p.max}" step="${p.st}"></div><div class="hint" id="h_${p.id}"></div></div>`).join('');
+ P.forEach(p=>{$('#r_'+p.id).oninput=e=>{setV(p.id,e.target.value);changed()};$('#n_'+p.id).oninput=e=>{if(e.target.value!=='')setV(p.id,e.target.value,1);changed()};$('#c_'+p.id).onchange=()=>{refresh();changed()}});
+ $$('.rs').forEach(b=>b.onclick=()=>{const p=P.find(x=>x.id===b.dataset.r);setV(p.id,p.v);changed()});
+}
+function setV(id,v,skipN){$('#r_'+id).value=v;if(!skipN)$('#n_'+id).value=v;refresh()}
+const val=id=>parseFloat($('#r_'+id).value);
+function refresh(){P.forEach(p=>{$('#h_'+p.id).textContent=p.h(val(p.id));$('#w_'+p.id).classList.toggle('off',!$('#c_'+p.id).checked)})}
+let tm;function changed(){if($('#live').checked){clearTimeout(tm);tm=setTimeout(()=>run(),900)}}
+$('#prompt').oninput=changed;$('#stop1').oninput=changed;
+/* API */
+let ctrl=null;
+const label=o=>Object.entries(o).map(([k,v])=>k==='sys'?'persona: '+v.slice(0,24)+'…':k+' = '+v).join(', ');
+function build(ov){
+ const g={};
+ P.forEach(p=>{if(ov[p.id]!==undefined||$('#c_'+p.id).checked){const v=ov[p.id]??val(p.id);if(!(p.id==='seed'&&v<0))g[p.id]=v}});
+ const st=ov.stop!==undefined?ov.stop:$('#stop1').value.trim();if(st)g.stopSequences=[st];
+ if(ov.json??$('#json').checked)g.responseMimeType='application/json';
+ if(/flash/.test($('#model').value)&&!$('#think').checked)g.thinkingConfig={thinkingBudget:0};
+ const b={contents:[{role:'user',parts:[{text:$('#prompt').value}]}],generationConfig:g};
+ const sys=ov.sys!==undefined?ov.sys:$('#sys').value.trim();if(sys)b.systemInstruction={parts:[{text:sys}]};
+ return b;
+}
+async function one(box,body,key,sig){
+ const out=box.querySelector('.out'),st=box.querySelector('.stats'),model=$('#model').value,stream=$('#stream').checked,t0=performance.now();
+ out.classList.add('cur');let fin='',us=null;
+ const base='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+(stream?':streamGenerateContent?alt=sse':':generateContent');
+ const call=b=>fetch(base,{method:'POST',signal:sig,headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify(b)});
+ const take=j=>{const c=j.candidates?.[0];(c?.content?.parts||[]).forEach(p=>{if(p.text&&!p.thought)out.textContent+=p.text});if(c?.finishReason)fin=c.finishReason;if(j.usageMetadata)us=j.usageMetadata};
+ try{
+  let r=await call(body);
+  if(!r.ok){const e=await r.json().catch(()=>({})),m=e.error?.message||'HTTP '+r.status;
+   if(body.generationConfig.thinkingConfig&&/think/i.test(m)){const b2=JSON.parse(JSON.stringify(body));delete b2.generationConfig.thinkingConfig;r=await call(b2)}
+   if(!r.ok)throw new Error(m)}
+  if(stream){const rd=r.body.getReader(),dc=new TextDecoder();let buf='';
+   for(;;){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});const ls=buf.split('\n');buf=ls.pop();
+    for(const l of ls)if(l.startsWith('data:'))try{take(JSON.parse(l.slice(5)))}catch(e){}}}
+  else take(await r.json());
+  const cut=fin==='MAX_TOKENS';
+  st.innerHTML=`Output tokens: <b>${us?.candidatesTokenCount??'?'}</b> · Prompt: ${us?.promptTokenCount??'?'} · ${Math.round(performance.now()-t0)} ms · finish: <span class="${cut?'warn':''}">${fin||'?'}</span>${cut?' (cut off by Max tokens)':''}`;
+  if(!out.textContent)out.textContent='(empty response. If thinking is on, raise Max output tokens.)';
+ }catch(e){out.innerHTML=e.name==='AbortError'?'<i>Stopped.</i>':'<span class="err">'+String(e.message).replace(/</g,'&lt;')+'</span>'}
+ out.classList.remove('cur');
+}
+function sim(texts){
+ const sets=texts.map(t=>new Set(t.toLowerCase().match(/\p{L}+/gu)||[]));let s=0,n=0;
+ for(let i=0;i<sets.length;i++)for(let j=i+1;j<sets.length;j++){const a=sets[i],b=sets[j],u=new Set([...a,...b]);let x=0;a.forEach(w=>b.has(w)&&x++);s+=u.size?x/u.size:1;n++}
+ return n?Math.round(s/n*100):null;
+}
+async function run(plan){
+ const key=$('#key').value.trim();
+ if(!key){alert('Paste your Gemini API key at the top first. Free key: aistudio.google.com/apikey');return}
+ try{$('#rem').checked?localStorage.setItem('katha_key',key):localStorage.removeItem('katha_key')}catch(e){}
+ if(ctrl)ctrl.abort();ctrl=new AbortController();
+ plan=Array.isArray(plan)?plan:rep({},+$('#n').value);
+ const showL=plan.some(o=>Object.keys(o).length);
+ $('#runs').innerHTML=plan.map((o,i)=>`<div class="run"><h3>Run ${i+1}${showL&&Object.keys(o).length?' · '+label(o):''}</h3><div class="out"></div><div class="stats"></div></div>`).join('');
+ $('#sim').hidden=true;$('#run').disabled=true;$('#stop').disabled=false;
+ const boxes=$$('.run'),c=ctrl;
+ await Promise.all(boxes.map((b,i)=>one(b,build(plan[i]),key,c.signal)));
+ if(c===ctrl){$('#run').disabled=false;$('#stop').disabled=true;
+  const ts=boxes.map(b=>b.querySelector('.out').textContent),ok=!boxes.some(b=>b.querySelector('.err'));
+  if(ts.length>1&&ok){$('#sim').textContent='Similarity '+sim(ts)+'%';$('#sim').hidden=false}}
+}
+$('#run').onclick=()=>run();$('#stop').onclick=()=>{ctrl&&ctrl.abort();$('#run').disabled=false;$('#stop').disabled=true};
+$('#eye').onclick=()=>{const k=$('#key');k.type=k.type==='password'?'text':'password';$('#eye').textContent=k.type==='password'?'Show':'Hide'};
+/* models */
+function setModels(ids){const c=$('#model').value;$('#model').innerHTML=ids.map(m=>`<option>${m}</option>`).join('');if(ids.includes(c))$('#model').value=c}
+setModels(['gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-2.5-flash']);
+$('#list').onclick=async()=>{
+ const key=$('#key').value.trim();if(!key){alert('Paste your API key first.');return}
+ try{const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':key}});const j=await r.json();if(!r.ok)throw new Error(j.error?.message);
+  const ids=j.models.filter(m=>m.name.includes('gemini')&&(m.supportedGenerationMethods||[]).includes('generateContent')).map(m=>m.name.replace('models/','')).sort().reverse();
+  const keep=$('#model').value;setModels(ids.includes(keep)?ids:[keep,...ids]);$('#model').value=keep;
+ }catch(e){alert('Could not list models: '+e.message)}
+};
+/* tabs */
+$$('#tabs button').forEach(b=>b.onclick=()=>{$$('#tabs button').forEach(x=>x.classList.toggle('on',x===b));$$('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t))});
+/* visualizer */
+const SC=[['Hanuman leapt across the ___',[['ocean',4],['sea',3.2],['water',2.3],['sky',1.8],['mountain',1],['fire',.5],['Lanka',.1],['moon',-.4],['dust',-1],['stone',-1.6]]],
+['Arjuna aimed his ___ at Karna',[['bow',4],['arrow',3.4],['Gandiva',3],['astra',2],['spear',.8],['mace',.3],['chariot',-.2],['glance',-.8],['prayer',-1.2],['sorrow',-1.8]]],
+['Sita waited in the ___',[['Ashoka grove',3.8],['forest',3],['garden',2.4],['palace',1.4],['hut',1],['cave',.2],['sky',-.5],['river',-.8],['fire',-1.2],['temple',-1.6]]]];
+const VP=[['T','Temperature',0.05,2,.05,1],['K','Top-K',1,10,1,10],['P','Top-P',0.05,1,.05,1]];let dist=[];
+$('#sc').innerHTML=SC.map((s,i)=>`<option value="${i}">${s[0]}</option>`).join('');
+$('#vctl').innerHTML=VP.map(p=>`<div class="ctl"><div class="t"><b>${p[1]}</b><span id="vv${p[0]}" style="color:var(--sf)"></span></div><input type="range" id="v${p[0]}" min="${p[2]}" max="${p[3]}" step="${p[4]}" value="${p[5]}" style="width:100%;accent-color:var(--sf)"></div>`).join('');
+function vz(){
+ const T=Math.max(+$('#vT').value,.02),K=+$('#vK').value,Pp=+$('#vP').value;VP.forEach(p=>$('#vv'+p[0]).textContent=$('#v'+p[0]).value);
+ const d=SC[+$('#sc').value][1],ex=d.map(([w,l])=>[w,Math.exp(l/T)]),z=ex.reduce((a,b)=>a+b[1],0);
+ const pr=ex.map(([w,e])=>({w,p:e/z})).sort((a,b)=>b.p-a.p);let cum=0;
+ pr.forEach((x,i)=>{x.k=i<K&&(i===0||cum<Pp);cum+=x.p});const ks=pr.filter(x=>x.k).reduce((a,b)=>a+b.p,0);pr.forEach(x=>x.f=x.k?x.p/ks:0);dist=pr;
+ $('#vt').textContent='“'+SC[+$('#sc').value][0]+'”';
+ $('#vz').innerHTML=pr.map(x=>`<div class="b ${x.k?'':'off'}"><em>${x.k?Math.round(x.f*100)+'%':'out'}</em><i style="height:${Math.max(2,(x.k?x.f:x.p)*100)}%"></i><span title="${x.w}">${x.w}</span></div>`).join('');$('#hist').innerHTML='';
+}
+$$('#vctl input,#sc').forEach(e=>e.oninput=vz);
+$('#draw').onclick=()=>{const c={};for(let i=0;i<50;i++){let r=Math.random(),w=dist.find(x=>x.k&&(r-=x.f)<=0)||dist[0];c[w.w.trim()]=(c[w.w.trim()]||0)+1}
+ $('#hist').innerHTML=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([w,n])=>`<span>${w} ×${n}</span>`).join('')};
+/* init */
+buildCtl();buildLib();pick(0);vz();
+try{const k=localStorage.getItem('katha_key');if(k){$('#key').value=k;$('#rem').checked=true}}catch(e){}
+</script></body></html>
